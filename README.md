@@ -1,20 +1,36 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Bionic Reader Extension
 
-# Run and deploy your AI Studio app
+An assistive technology extension for the web that converts text into Bionic Reading format to enhance focus and comprehension, particularly for individuals with ADHD.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/2cb914a0-9a6e-4172-9333-459759211e1e
+- **Custom Boding (Fixation)**: Adjust how many characters at the start of words are bolded.
+- **Saccade Control**: Control the jump distance between eye fixation points.
+- **Site Controls**: Whitelist or Blacklist domains for automatic conversion.
+- **Targeted Reading**: Use CSS selectors to target specific areas of a page (e.g., just the main article text).
+- **Live Sandbox**: Test settings in the options page before applying them globally.
+- **Dark Mode Support**: Native dark mode for the dashboard.
 
-## Run Locally
+## Installation
 
-**Prerequisites:**  Node.js
+1. Clone this repository.
+2. Run `npm install`.
+3. Run `npm run build`.
+4. Open Chrome and navigate to `chrome://extensions`.
+5. Enable "Developer mode".
+6. Click "Load unpacked" and select the `dist` folder.
 
+## Development
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- `npm run dev`: Start the dashboard in development mode (preview).
+- `npm run test`: Run the suite of bionic engine tests.
+- `npm run build`: Generate the production extension bundle.
+
+## Tech Stack
+
+- **React 19** & **Vite**
+- **TypeScript**
+- **Tailwind CSS**
+- **Vitest** for testing
+- **Lucide React** for iconography
+- **Chrome Extension Manifest V3**

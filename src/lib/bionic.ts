@@ -4,62 +4,63 @@ export interface BionicOptions {
   fixedLetters?: number;
 }
 
-function processWord(word: string, options: BionicOptions): string {
-  const match = word.match(/[a-zA-Z]/);
+/**
+ * Processes a single word and returns bolded HTML string.
+ */
+export function processWord(word: string, options: BionicOptions): string {
+  // Handle empty or whitespace-only words
+  if (!word || !word.trim()) return word;
+
+  // Find the boundaries of the actual word characters (ignoring leading/trailing punctuation)
+  const match = word.match(/([a-zA-Z0-9]+)/);
   if (!match) return word;
 
-  const lettersOnly = word.replace(/[^a-zA-Z]/g, '');
-  if (lettersOnly.length === 0) return word;
+  const coreWord = match[1];
+  const prefix = word.substring(0, match.index);
+  const suffix = word.substring(match.index! + coreWord.length);
 
   let boldCount = 0;
   if (options.fixedLetters !== undefined && options.fixedLetters > 0) {
-    boldCount = Math.min(lettersOnly.length, options.fixedLetters);
+    boldCount = Math.min(coreWord.length, options.fixedLetters);
   } else {
     const fixation = options.fixation ?? 0.5;
-    boldCount = Math.ceil(lettersOnly.length * fixation);
-    if (boldCount === 0 && lettersOnly.length > 0) boldCount = 1;
+    boldCount = Math.ceil(coreWord.length * fixation);
+    if (boldCount === 0 && coreWord.length > 0) boldCount = 1;
   }
 
-  let lettersBolded = 0;
-  let boldText = '';
-  let normalText = '';
+  const boldPart = coreWord.substring(0, boldCount);
+  const restPart = coreWord.substring(boldCount);
 
-  for (let i = 0; i < word.length; i++) {
-    const char = word[i];
-    if (/[a-zA-Z]/.test(char)) {
-      if (lettersBolded < boldCount) {
-        boldText += char;
-        lettersBolded++;
-      } else {
-        normalText += char;
-      }
-    } else {
-      if (lettersBolded < boldCount) {
-        boldText += char;
-      } else {
-        normalText += char;
-      }
-    }
-  }
-
-  return `<b>${boldText}</b>${normalText}`;
+  return `${prefix}<b>${boldPart}</b>${restPart}${suffix}`;
 }
 
+/**
+ * Converts a block of text into bionic format.
+ */
 export function textToBionic(text: string, options: BionicOptions = {}): string {
+  if (!text) return '';
+  
   const saccade = options.saccade ?? 1;
 
-  // Split by whitespace to preserve spacing
-  const tokens = text.split(/(\s+)/);
-  let wordIndex = 0;
+  // Split by whitespace and common delimiters while preserving them
+  const tokens = text.split(/(\s+|[-/\\()\[\]{}.,:;!?]+)/);
+  let contentWordIndex = 0;
 
   const bionicTokens = tokens.map((token) => {
-    if (/^\s+$/.test(token)) {
-      return token; // Preserve whitespace
+    // If it's a delimiter or whitespace, return as is
+    if (/^(\s+|[-/\\()\[\]{}.,:;!?]+)$/.test(token)) {
+      return token;
     }
-    wordIndex++;
-    if (wordIndex % saccade === 0 || saccade === 1) {
-      return processWord(token, options);
+
+    // Only process "words" that Contain letters/numbers
+    if (/[a-zA-Z0-9]/.test(token)) {
+      contentWordIndex++;
+      // Saccade logic: only process every Nth word if saccade > 1
+      if (contentWordIndex % saccade === 0 || saccade === 1) {
+        return processWord(token, options);
+      }
     }
+    
     return token;
   });
 

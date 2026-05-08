@@ -1,54 +1,43 @@
 // Function to convert text to bionic format (runs on the page)
-function textToBionic(text, options) {
-  const saccade = options.saccade || 1;
-  const fixedLetters = options.fixedLetters; // Default will be handled if not passed, but we pass 3
-  const fixation = options.fixation || 0.5;
+function processWord(word, options) {
+  if (!word || !word.trim()) return word;
+  const match = word.match(/([a-zA-Z0-9]+)/);
+  if (!match) return word;
 
-  const tokens = text.split(/(\s+)/);
-  let wordIndex = 0;
+  const coreWord = match[1];
+  const prefix = word.substring(0, match.index);
+  const suffix = word.substring(match.index + coreWord.length);
+
+  let boldCount = 0;
+  if (options.fixedLetters !== undefined && options.fixedLetters > 0) {
+    boldCount = Math.min(coreWord.length, options.fixedLetters);
+  } else {
+    const fixation = options.fixation || 0.5;
+    boldCount = Math.ceil(coreWord.length * fixation);
+    if (boldCount === 0 && coreWord.length > 0) boldCount = 1;
+  }
+
+  const boldPart = coreWord.substring(0, boldCount);
+  const restPart = coreWord.substring(boldCount);
+
+  return `${prefix}<b>${boldPart}</b>${restPart}${suffix}`;
+}
+
+function textToBionic(text, options) {
+  if (!text) return '';
+  const saccade = options.saccade || 1;
+  const tokens = text.split(/(\s+|[-/\\()\[\]{}.,:;!?]+)/);
+  let contentWordIndex = 0;
 
   const bionicTokens = tokens.map((token) => {
-    if (/^\s+$/.test(token)) {
+    if (/^(\s+|[-/\\()\[\]{}.,:;!?]+)$/.test(token)) {
       return token;
     }
-    wordIndex++;
-    if (wordIndex % saccade === 0 || saccade === 1) {
-      const match = token.match(/[a-zA-Z]/);
-      if (!match) return token;
-
-      const lettersOnly = token.replace(/[^a-zA-Z]/g, '');
-      if (lettersOnly.length === 0) return token;
-
-      let boldCount = 0;
-      if (fixedLetters !== undefined && fixedLetters > 0) {
-        boldCount = Math.min(lettersOnly.length, fixedLetters);
-      } else {
-        boldCount = Math.ceil(lettersOnly.length * fixation);
-        if (boldCount === 0 && lettersOnly.length > 0) boldCount = 1;
+    if (/[a-zA-Z0-9]/.test(token)) {
+      contentWordIndex++;
+      if (contentWordIndex % saccade === 0 || saccade === 1) {
+        return processWord(token, options);
       }
-
-      let lettersBolded = 0;
-      let boldText = '';
-      let normalText = '';
-
-      for (let i = 0; i < token.length; i++) {
-        const char = token[i];
-        if (/[a-zA-Z]/.test(char)) {
-          if (lettersBolded < boldCount) {
-            boldText += char;
-            lettersBolded++;
-          } else {
-            normalText += char;
-          }
-        } else {
-          if (lettersBolded < boldCount) {
-            boldText += char;
-          } else {
-            normalText += char;
-          }
-        }
-      }
-      return `<b>${boldText}</b>${normalText}`;
     }
     return token;
   });

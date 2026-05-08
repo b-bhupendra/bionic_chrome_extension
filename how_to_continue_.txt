@@ -1,0 +1,26 @@
+# Bionic Reader - High Level & Low Level Design
+
+## Project Overview
+A Chrome extension designed to help ADHD readers by converting web text into "Bionic Reading" format (bolding initial characters of words to guide eye fixation).
+
+## High Level Design (HLD)
+1. **Core Processing Engine**: A standalone TypeScript library (`src/lib/bionic.ts`) that handles the logic of converting plain text into HTML-marked bionic text.
+2. **Extension Architecture**:
+   - **Manifest V3**: Entry point defining permissions (storage, scripting), content scripts, and action popups.
+   - **Content Script (`public/content.js`)**: The "Worker" injected into pages. It uses a `TreeWalker` to find text nodes and a `MutationObserver` to handle dynamic content (SPAs).
+   - **Settings/Options Page (`src/App.tsx`)**: A React application used to configure global extension settings, acting as both an options page and a sandbox for testing.
+3. **Storage Strategy**: Uses `chrome.storage.sync` to keep settings (bolding counts, saccade, site lists, selectors) synchronized across devices.
+
+## Low Level Design (LLD)
+1. **Bionic Logic**:
+   - `processWord(word, options)`: Regex-based extraction of "core" word characters. Bolds a specific count (fixed) or percentage (fixation) of these characters.
+   - `textToBionic(text, options)`: Tokenizes text by whitespace and common punctuation, preserving all original characters while applying `processWord` to lexical tokens.
+2. **Dynamic Content Handling**: 
+   - Content script monitors the DOM. When new nodes are added (e.g., infinite scroll), it re-triggers the processing on the new elements.
+3. **Selective Targeting**:
+   - Users can provide CSS selectors. If present, the content script limits its `TreeWalker` scope to those specific elements instead of the entire `document.body`.
+4. **State Management**:
+   - `useExtensionStorage` hook: Synchronizes React state with the Chrome Storage API, falling back to `localStorage` for the development preview.
+
+## Testing Strategy
+- **Vitest**: Unit tests in `src/lib/bionic.test.ts` verify the processing engine against samples from ADHD-specific texts, technical documentation, and complex literature.

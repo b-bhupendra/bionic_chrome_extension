@@ -4,7 +4,14 @@ import { textToBionic } from './lib/bionic';
 import { useExtensionStorage } from './lib/useExtensionStorage';
 
 export default function App() {
-  const [text, setText] = useState('Bionic reading is a new method facilitating the reading process by guiding the eyes through text with artificial fixation points. As a result, the reader is only focusing on the highlighted initial letters and lets the brain center complete the word. In a digital world dominated by shallow forms of reading, Bionic Reading aims to encourage a more in-depth reading and understanding of written content.');
+  const [text, setText] = useState('Bionic reading is a new method facilitating the reading process by guiding the eyes through text with artificial fixation points.');
+
+  const SAMPLES = {
+    ADHD: "Research suggests that Bionic Reading can significantly improve comprehension for individuals with ADHD by reducing cognitive load during lexical access and fixation transitions.",
+    TECHNICAL: "The algorithm utilizes a dual-mode approach: 1. It identifies lexical tokens using regex. 2. It applies character-level bolding based on a fixation parameter (0.1 - 1.0) or a fixed integer value.",
+    LITERATURE: "It was the best of times, it was the worst of times; it was the age of wisdom, it was the age of foolishness; it was the epoch of belief, it was the epoch of incredulity.",
+    CODE: "function calculateFixation(word) { const length = word.length; return Math.ceil(length * 0.5); }"
+  };
   const [bionicHtml, setBionicHtml] = useState('');
   
   // Storage Settings
@@ -200,7 +207,19 @@ export default function App() {
         {/* Left Column: Input */}
         <section className={`flex-1 flex flex-col rounded-2xl overflow-hidden border ${darkMode ? 'border-zinc-800 bg-zinc-900/50' : 'border-stone-200 bg-white'}`}>
           <div className={`px-4 py-3 border-b flex items-center justify-between ${darkMode ? 'border-zinc-800' : 'border-stone-100'}`}>
-            <h2 className={`font-medium text-sm ${darkMode ? 'text-zinc-400' : 'text-stone-500'}`}>Test Preview Input</h2>
+            <div className="flex items-center gap-2">
+              <h2 className={`font-medium text-sm ${darkMode ? 'text-zinc-400' : 'text-stone-500'}`}>Test Preview Input</h2>
+              <div className="flex gap-1 ml-2">
+                {Object.entries(SAMPLES).map(([key, value]) => (
+                  <button 
+                    key={key}
+                    onClick={() => setText(value)}
+                    className={`text-[10px] px-1.5 py-0.5 rounded border transition-colors ${darkMode ? 'border-zinc-700 hover:bg-zinc-800 text-zinc-500' : 'border-stone-200 hover:bg-stone-50 text-stone-400'}`}>
+                    {key}
+                  </button>
+                ))}
+              </div>
+            </div>
             <button 
               onClick={() => setText('')}
               className={`text-xs px-2 py-1 rounded transition-colors ${darkMode ? 'hover:bg-zinc-800 text-zinc-400' : 'hover:bg-stone-100 text-stone-500'}`}
