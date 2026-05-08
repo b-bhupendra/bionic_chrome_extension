@@ -99,7 +99,8 @@ function init() {
     saccade: 1,
     listMode: 'blacklist',
     whitelist: [],
-    blacklist: []
+    blacklist: [],
+    selectors: []
   }, (items) => {
     if (!items.enabled) return;
 
@@ -118,7 +119,22 @@ function init() {
       style.textContent = '.bionic-converted b { font-weight: 700 !important; color: inherit; }';
       document.head.appendChild(style);
 
-      processTextNodes(document.body, items);
+      const applyBionic = () => {
+        if (items.selectors && items.selectors.length > 0) {
+          items.selectors.forEach(selector => {
+            try {
+              const elements = document.querySelectorAll(selector);
+              elements.forEach(el => processTextNodes(el, items));
+            } catch (e) {
+              console.warn('Bionic Reader: Invalid selector', selector);
+            }
+          });
+        } else {
+          processTextNodes(document.body, items);
+        }
+      };
+
+      applyBionic();
       
       // Basic observer for dynamic content
       let timeout;
@@ -130,7 +146,7 @@ function init() {
             if (mutation.addedNodes.length > 0) hasNewNodes = true;
           });
           if(hasNewNodes) {
-             processTextNodes(document.body, items);
+             applyBionic();
           }
         }, 500); // Debounce
       });

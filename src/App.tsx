@@ -13,6 +13,7 @@ export default function App() {
   const [listMode, setListMode] = useExtensionStorage<'whitelist' | 'blacklist'>('listMode', 'blacklist');
   const [whitelist, setWhitelist] = useExtensionStorage<string[]>('whitelist', []);
   const [blacklist, setBlacklist] = useExtensionStorage<string[]>('blacklist', []);
+  const [selectors, setSelectors] = useExtensionStorage<string[]>('selectors', []);
 
   // UI Settings
   const [fontSize, setFontSize] = useState(18);
@@ -20,6 +21,7 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [newDomain, setNewDomain] = useState('');
+  const [newSelector, setNewSelector] = useState('');
 
   useEffect(() => {
     setBionicHtml(textToBionic(text, { fixedLetters, saccade }));
@@ -52,6 +54,19 @@ export default function App() {
 
   const removeDomain = (domain: string) => {
     setList(currentList.filter(d => d !== domain));
+  };
+
+  const addSelector = () => {
+    if (!newSelector.trim()) return;
+    const selector = newSelector.trim();
+    if (!selectors.includes(selector)) {
+      setSelectors([...selectors, selector]);
+    }
+    setNewSelector('');
+  };
+
+  const removeSelector = (selector: string) => {
+    setSelectors(selectors.filter(s => s !== selector));
   };
 
   return (
@@ -127,7 +142,7 @@ export default function App() {
                    </button>
                 </div>
                 
-                <ul className={`mt-2 border rounded-lg overflow-hidden h-48 overflow-y-auto ${darkMode ? 'border-zinc-700' : 'border-stone-200'}`}>
+                <ul className={`mt-2 border rounded-lg overflow-hidden h-32 overflow-y-auto ${darkMode ? 'border-zinc-700' : 'border-stone-200'}`}>
                   {currentList.length === 0 ? (
                     <li className={`p-4 text-center text-sm ${darkMode ? 'text-zinc-500' : 'text-stone-400'}`}>No sites added</li>
                   ) : (
@@ -135,6 +150,43 @@ export default function App() {
                       <li key={domain} className={`flex justify-between items-center p-3 text-sm border-b last:border-0 ${darkMode ? 'border-zinc-800 bg-zinc-900/50' : 'border-stone-100 bg-stone-50/50'}`}>
                         <span>{domain}</span>
                         <button onClick={() => removeDomain(domain)} className="text-red-500 hover:text-red-600 p-1">
+                           <X className="w-4 h-4" />
+                        </button>
+                      </li>
+                    ))
+                  )}
+                </ul>
+             </div>
+
+             <div className="flex flex-col gap-2 mt-2 border-t pt-4 dark:border-zinc-800 border-stone-100">
+                <label className="text-sm font-medium">Selective Target Selectors</label>
+                <p className={`text-[11px] mb-1 ${darkMode ? 'text-zinc-500' : 'text-stone-400'}`}>
+                  Specify CSS selectors (e.g. <code>article</code>, <code>.main-content</code>, <code>#wiki-body</code>) to only convert specific areas. Leave empty to convert everything.
+                </p>
+                <div className="flex gap-2">
+                   <input
+                     type="text"
+                     placeholder="e.g. article, .content"
+                     value={newSelector}
+                     onChange={(e) => setNewSelector(e.target.value)}
+                     onKeyDown={(e) => e.key === 'Enter' && addSelector()}
+                     className={`flex-1 px-3 py-2 text-sm rounded-lg border outline-none focus:ring-2 focus:ring-indigo-500/50 ${darkMode ? 'bg-zinc-950 border-zinc-700' : 'bg-white border-stone-300'}`}
+                   />
+                   <button 
+                     onClick={addSelector}
+                     className="px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors">
+                     <Plus className="w-4 h-4" />
+                   </button>
+                </div>
+                
+                <ul className={`mt-2 border rounded-lg overflow-hidden h-32 overflow-y-auto ${darkMode ? 'border-zinc-700' : 'border-stone-200'}`}>
+                  {selectors.length === 0 ? (
+                    <li className={`p-4 text-center text-sm ${darkMode ? 'text-zinc-500' : 'text-stone-400'}`}>All page text targeted</li>
+                  ) : (
+                    selectors.map(selector => (
+                      <li key={selector} className={`flex justify-between items-center p-3 text-sm border-b last:border-0 ${darkMode ? 'border-zinc-800 bg-zinc-900/50' : 'border-stone-100 bg-stone-50/50'}`}>
+                        <code className="bg-indigo-500/10 text-indigo-400 px-1 rounded">{selector}</code>
+                        <button onClick={() => removeSelector(selector)} className="text-red-500 hover:text-red-600 p-1">
                            <X className="w-4 h-4" />
                         </button>
                       </li>
