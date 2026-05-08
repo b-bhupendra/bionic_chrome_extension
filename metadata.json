@@ -1,0 +1,6 @@
+{
+  "name": "Bionic Reader",
+  "description": "A web application that converts text into bionic reading format to help ADHD readers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

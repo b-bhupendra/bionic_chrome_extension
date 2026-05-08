@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Bionic Reader",
+  "version": "1.0",
+  "description": "Converts text into bionic reading format to help ADHD readers.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_page": "index.html",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
